@@ -1,32 +1,21 @@
--- Create accounts table 
-CREATE TABLE IF NOT EXISTS accounts (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    username VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+-- ============================================================
+-- Migration 002: Accounts Table (OAuth accounts)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.accounts (
+    id                  BIGSERIAL PRIMARY KEY,
+    user_id             BIGINT      NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    type                TEXT        NOT NULL CHECK (type <> ''::text),
+    provider            TEXT        NOT NULL CHECK (provider <> ''::text),
+    provider_account_id TEXT        NOT NULL CHECK (provider_account_id <> ''::text),
+    refresh_token       TEXT,
+    access_token        TEXT,
+    expires_at          BIGINT,
+    id_token            TEXT,
+    scope               TEXT,
+    session_state       TEXT,
+    token_type          TEXT,
+    UNIQUE (provider, provider_account_id)
 );
 
--- Create index on username for faster lookups
-CREATE INDEX IF NOT EXISTS idx_accounts_username ON accounts(username);
-
--- Create updated_at trigger function
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- Create trigger to auto-update updated_at
-CREATE TRIGGER update_accounts_updated_at 
-    BEFORE UPDATE ON accounts 
-    FOR EACH ROW 
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Create foreign key constraint
-ALTER TABLE accounts
-ADD CONSTRAINT fk_accounts_user_id
-FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON public.accounts(user_id);

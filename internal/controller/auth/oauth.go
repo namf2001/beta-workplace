@@ -54,8 +54,7 @@ func (i impl) OAuthLogin(ctx context.Context, input OAuthInput) (string, error) 
 			Image: input.Image,
 		}
 		if input.EmailVerified {
-			now := time.Now()
-			newUser.EmailVerified = &now
+			newUser.EmailVerified = time.Now()
 		}
 
 		user, err = i.repo.User().Create(ctx, newUser)

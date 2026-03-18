@@ -1,38 +1,23 @@
--- Alter users table to add new columns for Auth
--- We check if columns exist to avoid errors on repeated runs, though standard practice is clean migration.
+-- ============================================================
+-- Migration 003: Sessions & Verification Tokens
+-- ============================================================
 
-ALTER TABLE users ADD COLUMN IF NOT EXISTS "emailVerified" TIMESTAMPTZ;
-ALTER TABLE users ADD COLUMN IF NOT EXISTS image TEXT;
-ALTER TABLE users ADD COLUMN IF NOT EXISTS password VARCHAR(255);
+-- ─── SESSIONS ────────────────────────────────────────────────
 
--- Create accounts table for OAuth
-CREATE TABLE IF NOT EXISTS accounts (
-  id SERIAL PRIMARY KEY,
-  "userId" BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Changed to BIGINT to match users.id
-  type VARCHAR(255) NOT NULL,
-  provider VARCHAR(255) NOT NULL,
-  "providerAccountId" VARCHAR(255) NOT NULL,
-  refresh_token TEXT,
-  access_token TEXT,
-  expires_at BIGINT,
-  id_token TEXT,
-  scope TEXT,
-  session_state TEXT,
-  token_type TEXT
+CREATE TABLE IF NOT EXISTS public.sessions (
+    id            BIGSERIAL   PRIMARY KEY,
+    user_id       BIGINT      NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    expires       TIMESTAMPTZ NOT NULL,
+    session_token TEXT        NOT NULL UNIQUE CHECK (session_token <> ''::text)
 );
 
--- Create sessions table
-CREATE TABLE IF NOT EXISTS sessions (
-  id SERIAL PRIMARY KEY,
-  "userId" BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Changed to BIGINT to match users.id
-  expires TIMESTAMPTZ NOT NULL,
-  "sessionToken" VARCHAR(255) NOT NULL
-);
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON public.sessions(user_id);
 
--- Create verification_token table
-CREATE TABLE IF NOT EXISTS verification_token (
-  identifier TEXT NOT NULL,
-  expires TIMESTAMPTZ NOT NULL,
-  token TEXT NOT NULL,
-  PRIMARY KEY (identifier, token)
+-- ─── VERIFICATION TOKENS ─────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS public.verification_token (
+    identifier TEXT        NOT NULL CHECK (identifier <> ''::text),
+    expires    TIMESTAMPTZ NOT NULL,
+    token      TEXT        NOT NULL CHECK (token <> ''::text),
+    PRIMARY KEY (identifier, token)
 );

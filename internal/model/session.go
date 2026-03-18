@@ -4,8 +4,8 @@ import "time"
 
 // Session represents a user session
 type Session struct {
-	ID           int64     `json:"id" db:"id"`
-	UserID       int64     `json:"userId" db:"userId"`
-	Expires      time.Time `json:"expires" db:"expires"`
-	SessionToken string    `json:"sessionToken" db:"sessionToken"`
+	ID           int64     `json:"id,omitempty"            db:"id"`
+	UserID       int64     `json:"user_id,omitempty"       db:"user_id"`
+	Expires      time.Time `json:"expires,omitempty"       db:"expires"`
+	SessionToken string    `json:"session_token,omitempty" db:"session_token"`
 }

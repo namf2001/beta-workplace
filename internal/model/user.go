@@ -8,14 +8,22 @@ import (
 
 // User represents a user in the system
 type User struct {
-	ID            int64      `json:"id" db:"id"`
-	Email         string     `json:"email" db:"email"`
-	Name          string     `json:"name" db:"name"`
-	EmailVerified *time.Time `json:"emailVerified" db:"emailVerified"`
-	Image         string     `json:"image" db:"image"`
-	Password      string     `json:"-" db:"password"` // Stored in users now
-	CreatedAt     time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at" db:"updated_at"`
+	ID            int64     `json:"id,omitempty"             db:"id"`
+	Name          string    `json:"name,omitempty"           db:"name"`
+	Email         string    `json:"email,omitempty"          db:"email"`
+	EmailVerified time.Time `json:"email_verified,omitempty" db:"email_verified"`
+	Image         string    `json:"image,omitempty"          db:"image"`
+	Password      string    `json:"-"                        db:"password"`
+	CreatedAt     time.Time `json:"created_at,omitempty"     db:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at,omitempty"     db:"updated_at"`
+}
+
+// Prepare auto-sets timestamps before insert/update
+func (u *User) Prepare() {
+	if u.CreatedAt.IsZero() {
+		u.CreatedAt = time.Now()
+	}
+	u.UpdatedAt = time.Now()
 }
 
 // Validate validates user data

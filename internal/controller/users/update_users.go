@@ -17,7 +17,7 @@ type UpdateUserInput struct {
 func (i impl) UpdateUser(ctx context.Context, id int64, input UpdateUserInput) error {
 	// Validate input
 	if err := validator.Validate(input); err != nil {
-		return pkgerrors.WithStack(err)	
+		return pkgerrors.WithStack(err)
 	}
 
 	// Get existing user

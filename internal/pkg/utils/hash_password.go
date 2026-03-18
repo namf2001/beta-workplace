@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	pkgerrors "github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const defaultCost = 10

@@ -12,7 +12,7 @@ import (
 // GetByEmail implements Repository.
 func (i impl) GetByEmail(ctx context.Context, email string) (model.User, error) {
 	query := `
-		SELECT id, email, name, password, image, "emailVerified", created_at, updated_at
+		SELECT id, email, name, password, image, email_verified, created_at, updated_at
 		FROM users
 		WHERE email = $1
 	`

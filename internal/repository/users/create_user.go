@@ -12,9 +12,9 @@ import (
 // Create implements Repository.
 func (i impl) Create(ctx context.Context, user model.User) (model.User, error) {
 	query := `
-		INSERT INTO users (email, name, password, image, "emailVerified")
+		INSERT INTO users (email, name, password, image, email_verified)
 		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, email, name, password, image, "emailVerified", created_at, updated_at
+		RETURNING id, email, name, password, image, email_verified, created_at, updated_at
 	`
 
 	var created model.User

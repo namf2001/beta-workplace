@@ -11,7 +11,7 @@ import (
 // GetByID implements Repository.
 func (i impl) GetByID(ctx context.Context, id int64) (model.User, error) {
 	query := `
-		SELECT id, email, name, password, image, "emailVerified", created_at, updated_at
+		SELECT id, email, name, password, image, email_verified, created_at, updated_at
 		FROM users
 		WHERE id = $1
 	`

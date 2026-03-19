@@ -19,7 +19,7 @@ func (i impl) GetByUserID(ctx context.Context, userID int64) ([]model.Account, e
 	if err != nil {
 		return nil, pkgerrors.WithStack(err)
 	}
-	defer func() { _ = rows.Close() }()
+	defer rows.Close()
 
 	var accounts []model.Account
 	for rows.Next() {

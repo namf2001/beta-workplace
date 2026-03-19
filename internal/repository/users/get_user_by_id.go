@@ -17,16 +17,20 @@ func (i impl) GetByID(ctx context.Context, id int64) (model.User, error) {
 	`
 
 	var user model.User
+	var ev sql.NullTime
 	err := i.db.QueryRowContext(ctx, query, id).Scan(
-		&user.ID,
-		&user.Email,
-		&user.Name,
-		&user.Password,
-		&user.Image,
-		&user.EmailVerified,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-	)
+			&user.ID,
+			&user.Email,
+			&user.Name,
+			&user.Password,
+			&user.Image,
+			&ev,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		)
+		if ev.Valid {
+			user.EmailVerified = &ev.Time
+		}
 
 	if err == sql.ErrNoRows {
 		return model.User{}, pkgerrors.WithStack(ErrNotFound)

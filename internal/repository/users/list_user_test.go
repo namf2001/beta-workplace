@@ -35,7 +35,7 @@ func TestList(t *testing.T) {
 		},
 		"success - filter by email": {
 			givenFilters: ListFilters{
-				Email: "admin",
+				Email: "test1",
 			},
 			expLen: 1,
 		},

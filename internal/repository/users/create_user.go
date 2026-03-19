@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/lib/pq"
@@ -18,16 +19,20 @@ func (i impl) Create(ctx context.Context, user model.User) (model.User, error) {
 	`
 
 	var created model.User
+	var ev sql.NullTime
 	err := i.db.QueryRowContext(ctx, query, user.Email, user.Name, user.Password, user.Image, user.EmailVerified).Scan(
 		&created.ID,
 		&created.Email,
 		&created.Name,
 		&created.Password,
 		&created.Image,
-		&created.EmailVerified,
+		&ev,
 		&created.CreatedAt,
 		&created.UpdatedAt,
 	)
+	if ev.Valid {
+		created.EmailVerified = &ev.Time
+	}
 
 	if err != nil {
 		var pqErr *pq.Error

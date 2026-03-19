@@ -11,7 +11,7 @@ type User struct {
 	ID            int64     `json:"id,omitempty"             db:"id"`
 	Name          string    `json:"name,omitempty"           db:"name"`
 	Email         string    `json:"email,omitempty"          db:"email"`
-	EmailVerified time.Time `json:"email_verified,omitempty" db:"email_verified"`
+	EmailVerified *time.Time `json:"email_verified,omitempty" db:"email_verified"`
 	Image         string    `json:"image,omitempty"          db:"image"`
 	Password      string    `json:"-"                        db:"password"`
 	CreatedAt     time.Time `json:"created_at,omitempty"     db:"created_at"`

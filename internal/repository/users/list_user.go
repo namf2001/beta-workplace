@@ -56,7 +56,7 @@ func (i impl) List(ctx context.Context, filters ListFilters) ([]model.User, erro
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to list users")
 	}
-	defer func() { _ = rows.Close() }()
+	defer rows.Close()
 
 	var users []model.User
 	for rows.Next() {

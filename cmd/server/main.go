@@ -69,7 +69,7 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 	log.Println("✓ Database connected successfully")
 
 	// Initialize OAuth

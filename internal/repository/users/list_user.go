@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"database/sql"
 	"strconv"
 
 	"github.com/namf2001/beta-workplace/internal/model"
@@ -61,17 +62,21 @@ func (i impl) List(ctx context.Context, filters ListFilters) ([]model.User, erro
 	var users []model.User
 	for rows.Next() {
 		var user model.User
+		var ev sql.NullTime
 		err := rows.Scan(
 			&user.ID,
 			&user.Email,
 			&user.Name,
 			&user.Image,
-			&user.EmailVerified,
+			&ev,
 			&user.CreatedAt,
 			&user.UpdatedAt,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to scan user")
+		}
+		if ev.Valid {
+			user.EmailVerified = &ev.Time
 		}
 		users = append(users, user)
 	}

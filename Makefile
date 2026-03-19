@@ -1,5 +1,5 @@
 # Makefile
-include .env
+-include .env
 export
 
 .PHONY: all build build-all run run-race clean clear test test-coverage deps lint fmt vet generate audit docker-build docker-up docker-down migrate-up migrate-down help

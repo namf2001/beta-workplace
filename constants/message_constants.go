@@ -1,8 +1,18 @@
 package constants
 
+import "github.com/namf2001/beta-workplace/internal/handler/response"
+
 type ResponseCode struct {
 	Code    string
 	Message string
+}
+
+func (r ResponseCode) WithData(data interface{}) response.Response {
+	return response.Response{
+		Code:    r.Code,
+		Message: r.Message,
+		Data:    data,
+	}
 }
 
 var (
@@ -26,6 +36,9 @@ var (
 	SendMailForgotPasswordFail = ResponseCode{"ERR110", "Send mail verification fail"}
 	InvalidEmailFail           = ResponseCode{"ERR110", "Invalid email address format"}
 	InvalidPhoneNumberFail     = ResponseCode{"ERR111", "Invalid phone number format"}
+	MissingAuthorizationHeader = ResponseCode{"ERR112", "Missing authorization header"}
+	InvalidAuthorizationHeader = ResponseCode{"ERR113", "Invalid authorization header format"}
+	InvalidToken               = ResponseCode{"ERR114", "Invalid token"}
 
 	// File Management Errors
 	UploadFileFail       = ResponseCode{"ERR016", "Upload file fail"}
@@ -71,6 +84,10 @@ var (
 	InviteCodeRequired           = ResponseCode{"ERR400", "Invite code is required"}
 	InvalidRole                  = ResponseCode{"ERR401", "Invalid role"}
 	NoFieldsToUpdate             = ResponseCode{"ERR402", "No fields to update"}
+
+	// OAuth Errors
+	InvalidOAuthState  = ResponseCode{"ERR040", "Invalid OAuth state"}
+	CodeExchangeFailed = ResponseCode{"ERR041", "Code exchange failed"}
 
 	// Project Management Errors
 	CreateProjectFail           = ResponseCode{"ERR200", "Create project failed"}
@@ -125,6 +142,7 @@ var (
 	// General Errors
 	InternalServerError = ResponseCode{"ERR500", "Internal server error"}
 	ConvertJSONFail     = ResponseCode{"ERR082", "Convert Object to JSON fail"}
+	BindJSONFail        = ResponseCode{"ERR084", "Invalid request body"}
 	EncryptRSAFail      = ResponseCode{"ERR099", "Encrypt data fail"}
 	DecryptRSAFail      = ResponseCode{"ERR099", "Decrypt data fail"}
 	GenerateKeyPairFail = ResponseCode{"ERR100", "Generate key pair fail"}

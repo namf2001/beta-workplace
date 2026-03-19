@@ -71,6 +71,7 @@ func (rtr router) apiV1(r *gin.Engine) {
 	{
 		auth.POST("/login", rtr.authHandler.Login())
 		auth.POST("/register", rtr.authHandler.Register())
+		auth.POST("/forgot-password", rtr.authHandler.ForgotPassword())
 		auth.GET("/google/login", rtr.authHandler.GoogleLogin())
 		auth.GET("/google/callback", rtr.authHandler.GoogleCallback())
 	}
@@ -78,6 +79,11 @@ func (rtr router) apiV1(r *gin.Engine) {
 	protected := v1.Group("/")
 	protected.Use(appMiddleware.RequireAuth)
 	{
+		authProtected := protected.Group("/auth")
+		{
+			authProtected.POST("/logout", rtr.authHandler.Logout())
+		}
+
 		users := protected.Group("/users")
 		{
 			users.POST("", rtr.usersHandler.CreateUser())

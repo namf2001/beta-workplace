@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/namf2001/beta-workplace/constants"
 	ctrlUsers "github.com/namf2001/beta-workplace/internal/controller/users"
 	"github.com/namf2001/beta-workplace/internal/handler/response"
 	"github.com/namf2001/beta-workplace/internal/model"
@@ -35,7 +36,7 @@ type ListUsersResponse struct {
 // @Param        offset query     int     false  "Offset"
 // @Param        email  query     string  false  "Email filter"
 // @Success      200  {object} users.ListUsersResponse
-// @Failure      500  {object} response.Error
+// @Failure      500  {object} response.Response
 // @Security     BearerAuth
 // @Router       /users [get]
 func (h Handler) ListUsers() gin.HandlerFunc {
@@ -67,15 +68,23 @@ func (h Handler) ListUsers() gin.HandlerFunc {
 
 		result, totalUser, err := h.userCtrl.ListUsers(c.Request.Context(), filters)
 		if err != nil {
-			response.HandleError(c, convertError(err))
+			c.JSON(http.StatusInternalServerError, response.NewResponse(
+				constants.InternalServerError.Code,
+				err.Error(),
+				nil,
+			))
 			return
 		}
 
-		c.JSON(http.StatusOK, ListUsersResponse{
-			Users:  result,
-			Total:  totalUser,
-			Limit:  limit,
-			Offset: offset,
-		})
+		c.JSON(http.StatusOK, response.NewResponse(
+			constants.GetUserInfoSuccess.Code,
+			constants.GetUserInfoSuccess.Message,
+			ListUsersResponse{
+				Users:  result,
+				Total:  totalUser,
+				Limit:  limit,
+				Offset: offset,
+			},
+		))
 	}
 }

@@ -24,6 +24,52 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/forgot-password": {
+            "post": {
+                "description": "Forgot password via 2-step OTP flow",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Forgot Password",
+                "parameters": [
+                    {
+                        "description": "Forgot password info",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.ForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/google/callback": {
             "get": {
                 "description": "Handle Google OAuth callback and return token",
@@ -60,13 +106,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -120,25 +166,65 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.LoginResponse"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logout the user by clearing their session/token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -146,7 +232,7 @@ const docTemplate = `{
         },
         "/auth/register": {
             "post": {
-                "description": "Register a new user account",
+                "description": "Register a new user account via 3-step OTP flow",
                 "consumes": [
                     "application/json"
                 ],
@@ -172,19 +258,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.RegisterResponse"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -238,7 +324,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -281,19 +367,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -336,19 +422,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -395,13 +481,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -439,13 +525,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.Error"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -453,6 +539,33 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "auth.ForgotPasswordRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "step"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "new_password": {
+                    "description": "required for step 2",
+                    "type": "string"
+                },
+                "otp": {
+                    "description": "required for step 2",
+                    "type": "string"
+                },
+                "step": {
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2
+                    ]
+                }
+            }
+        },
         "auth.GoogleCallbackResponse": {
             "type": "object",
             "properties": {
@@ -484,39 +597,35 @@ const docTemplate = `{
                 }
             }
         },
-        "auth.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
         "auth.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
-                "name",
-                "password"
+                "step"
             ],
             "properties": {
                 "email": {
                     "type": "string"
                 },
                 "name": {
+                    "description": "required for step 3",
+                    "type": "string"
+                },
+                "otp": {
+                    "description": "required for step 2 \u0026 3",
                     "type": "string"
                 },
                 "password": {
-                    "type": "string",
-                    "minLength": 6
-                }
-            }
-        },
-        "auth.RegisterResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
+                    "description": "required for step 3",
                     "type": "string"
+                },
+                "step": {
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2,
+                        3
+                    ]
                 }
             }
         },
@@ -529,7 +638,7 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "emailVerified": {
+                "email_verified": {
                     "type": "string"
                 },
                 "id": {
@@ -546,17 +655,15 @@ const docTemplate = `{
                 }
             }
         },
-        "response.Error": {
+        "response.Response": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "string"
                 },
-                "desc": {
+                "data": {},
+                "message": {
                     "type": "string"
-                },
-                "status": {
-                    "type": "integer"
                 }
             }
         },

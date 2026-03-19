@@ -11,9 +11,9 @@ import (
 // GetByToken implements Repository.
 func (i impl) GetByToken(ctx context.Context, token string) (model.Session, error) {
 	query := `
-		SELECT id, "userId", expires, "sessionToken"
+		SELECT id, user_id, expires, session_token
 		FROM sessions
-		WHERE "sessionToken" = $1
+		WHERE session_token = $1
 	`
 
 	var session model.Session

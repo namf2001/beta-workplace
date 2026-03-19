@@ -1,5 +1,24 @@
 basePath: /api/v1
 definitions:
+  auth.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+      new_password:
+        description: required for step 2
+        type: string
+      otp:
+        description: required for step 2
+        type: string
+      step:
+        enum:
+        - 1
+        - 2
+        type: integer
+    required:
+    - email
+    - step
+    type: object
   auth.GoogleCallbackResponse:
     properties:
       token:
@@ -20,29 +39,28 @@ definitions:
     - email
     - password
     type: object
-  auth.LoginResponse:
-    properties:
-      token:
-        type: string
-    type: object
   auth.RegisterRequest:
     properties:
       email:
         type: string
       name:
+        description: required for step 3
+        type: string
+      otp:
+        description: required for step 2 & 3
         type: string
       password:
-        minLength: 6
+        description: required for step 3
         type: string
+      step:
+        enum:
+        - 1
+        - 2
+        - 3
+        type: integer
     required:
     - email
-    - name
-    - password
-    type: object
-  auth.RegisterResponse:
-    properties:
-      token:
-        type: string
+    - step
     type: object
   model.User:
     properties:
@@ -50,7 +68,7 @@ definitions:
         type: string
       email:
         type: string
-      emailVerified:
+      email_verified:
         type: string
       id:
         type: integer
@@ -61,14 +79,13 @@ definitions:
       updated_at:
         type: string
     type: object
-  response.Error:
+  response.Response:
     properties:
       code:
         type: string
-      desc:
+      data: {}
+      message:
         type: string
-      status:
-        type: integer
     type: object
   users.CreateUserRequest:
     properties:
@@ -128,6 +145,36 @@ info:
   title: Go Backend Template API
   version: "1.0"
 paths:
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Forgot password via 2-step OTP flow
+      parameters:
+      - description: Forgot password info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Forgot Password
+      tags:
+      - auth
   /auth/google/callback:
     get:
       description: Handle Google OAuth callback and return token
@@ -152,11 +199,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
       summary: Google callback
       tags:
       - auth
@@ -191,27 +238,52 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.LoginResponse'
+            $ref: '#/definitions/response.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
       summary: User login
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout the user by clearing their session/token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Logout user
       tags:
       - auth
   /auth/register:
     post:
       consumes:
       - application/json
-      description: Register a new user account
+      description: Register a new user account via 3-step OTP flow
       parameters:
       - description: Registration info
         in: body
@@ -225,15 +297,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.RegisterResponse'
+            $ref: '#/definitions/response.Response'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
       summary: Register user
       tags:
       - auth
@@ -265,7 +337,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: List users
@@ -292,15 +364,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: Create user
@@ -325,11 +397,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: Delete user
@@ -355,15 +427,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: Get user
@@ -393,11 +465,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/response.Error'
+            $ref: '#/definitions/response.Response'
       security:
       - BearerAuth: []
       summary: Update user

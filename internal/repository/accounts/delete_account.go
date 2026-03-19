@@ -10,7 +10,7 @@ import (
 func (i impl) Delete(ctx context.Context, provider, providerAccountID string) error {
 	query := `
 		DELETE FROM accounts
-		WHERE provider = $1 AND "providerAccountId" = $2
+		WHERE provider = $1 AND provider_account_id = $2
 	`
 
 	_, err := i.db.ExecContext(ctx, query, provider, providerAccountID)

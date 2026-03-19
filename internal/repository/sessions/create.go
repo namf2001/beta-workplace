@@ -10,9 +10,9 @@ import (
 // Create implements Repository.
 func (i impl) Create(ctx context.Context, session model.Session) (model.Session, error) {
 	query := `
-		INSERT INTO sessions ("userId", expires, "sessionToken")
+		INSERT INTO sessions (user_id, expires, session_token)
 		VALUES ($1, $2, $3)
-		RETURNING id, "userId", expires, "sessionToken"
+		RETURNING id, user_id, expires, session_token
 	`
 
 	var created model.Session

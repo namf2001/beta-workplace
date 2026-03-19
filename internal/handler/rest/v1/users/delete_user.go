@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/namf2001/beta-workplace/constants"
 	"github.com/namf2001/beta-workplace/internal/handler/response"
 )
 
@@ -16,8 +17,8 @@ import (
 // @Produce      json
 // @Param        id   path      int  true  "User ID"
 // @Success      204  {object} nil
-// @Failure      400  {object} response.Error
-// @Failure      500  {object} response.Error
+// @Failure      400  {object} response.Response
+// @Failure      500  {object} response.Response
 // @Security     BearerAuth
 // @Router       /users/{id} [delete]
 func (h Handler) DeleteUser() gin.HandlerFunc {
@@ -25,15 +26,27 @@ func (h Handler) DeleteUser() gin.HandlerFunc {
 		idStr := c.Param("id")
 		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err != nil {
-			response.HandleError(c, webErrInvalidID)
+			c.JSON(http.StatusBadRequest, response.NewResponse(
+				constants.InvalidRequestParams.Code,
+				constants.InvalidRequestParams.Message,
+				nil,
+			))
 			return
 		}
 
 		if err := h.userCtrl.DeleteUser(c.Request.Context(), id); err != nil {
-			response.HandleError(c, convertError(err))
+			c.JSON(http.StatusInternalServerError, response.NewResponse(
+				constants.DeleteUserFail.Code,
+				err.Error(),
+				nil,
+			))
 			return
 		}
 
-		c.Status(http.StatusNoContent)
+		c.JSON(http.StatusOK, response.NewResponse(
+			constants.DeleteAccountSuccess.Code,
+			constants.DeleteAccountSuccess.Message,
+			nil,
+		))
 	}
 }

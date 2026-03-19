@@ -1,9 +1,11 @@
 package users
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/namf2001/beta-workplace/constants"
 	ctrlUsers "github.com/namf2001/beta-workplace/internal/controller/users"
 	"github.com/namf2001/beta-workplace/internal/handler/response"
 	"github.com/namf2001/beta-workplace/internal/model"
@@ -29,21 +31,29 @@ type CreateUserResponse struct {
 // @Produce      json
 // @Param        input body users.CreateUserRequest true "User info"
 // @Success      201  {object} users.CreateUserResponse
-// @Failure      400  {object} response.Error
-// @Failure      409  {object} response.Error
-// @Failure      500  {object} response.Error
+// @Failure      400  {object} response.Response
+// @Failure      409  {object} response.Response
+// @Failure      500  {object} response.Response
 // @Security     BearerAuth
 // @Router       /users [post]
 func (h Handler) CreateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req CreateUserRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			response.HandleError(c, err)
+			c.JSON(http.StatusBadRequest, response.NewResponse(
+				constants.BindJSONFail.Code,
+				constants.BindJSONFail.Message,
+				nil,
+			))
 			return
 		}
 
 		if err := validator.Validate(req); err != nil {
-			response.HandleError(c, webErrValidationFailed)
+			c.JSON(http.StatusBadRequest, response.NewResponse(
+				constants.InvalidRequestParams.Code,
+				constants.InvalidRequestParams.Message,
+				nil,
+			))
 			return
 		}
 
@@ -54,10 +64,22 @@ func (h Handler) CreateUser() gin.HandlerFunc {
 
 		user, err := h.userCtrl.CreateUser(c.Request.Context(), input)
 		if err != nil {
-			response.HandleError(c, convertError(err))
+			code := constants.InternalServerError.Code
+			if errors.Is(err, ctrlUsers.ErrUserExited) {
+				code = constants.EmailExists.Code
+			}
+			c.JSON(http.StatusInternalServerError, response.NewResponse(
+				code,
+				err.Error(),
+				nil,
+			))
 			return
 		}
 
-		c.JSON(http.StatusCreated, CreateUserResponse{User: user})
+		c.JSON(http.StatusCreated, response.NewResponse(
+			constants.RegisterUserSuccess.Code,
+			constants.RegisterUserSuccess.Message,
+			CreateUserResponse{User: user},
+		))
 	}
 }

@@ -10,9 +10,9 @@ import (
 // GetByUserID implements Repository.
 func (i impl) GetByUserID(ctx context.Context, userID int64) ([]model.Account, error) {
 	query := `
-		SELECT id, "userId", type, provider, "providerAccountId", refresh_token, access_token, expires_at, id_token, scope, session_state, token_type
+		SELECT id, user_id, type, provider, provider_account_id, refresh_token, access_token, expires_at, id_token, scope, session_state, token_type
 		FROM accounts
-		WHERE "userId" = $1
+		WHERE user_id = $1
 	`
 
 	rows, err := i.db.QueryContext(ctx, query, userID)

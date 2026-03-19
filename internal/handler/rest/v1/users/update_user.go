@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/namf2001/beta-workplace/constants"
 	ctrlUsers "github.com/namf2001/beta-workplace/internal/controller/users"
 	"github.com/namf2001/beta-workplace/internal/handler/response"
 	"github.com/namf2001/beta-workplace/internal/pkg/validator"
@@ -25,8 +26,8 @@ type UpdateUserRequest struct {
 // @Param        id     path      int                    true  "User ID"
 // @Param        input  body      users.UpdateUserRequest  true  "Update info"
 // @Success      204  {object} nil
-// @Failure      400  {object} response.Error
-// @Failure      500  {object} response.Error
+// @Failure      400  {object} response.Response
+// @Failure      500  {object} response.Response
 // @Security     BearerAuth
 // @Router       /users/{id} [put]
 func (h Handler) UpdateUser() gin.HandlerFunc {
@@ -34,18 +35,30 @@ func (h Handler) UpdateUser() gin.HandlerFunc {
 		idStr := c.Param("id")
 		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err != nil {
-			response.HandleError(c, webErrInvalidID)
+			c.JSON(http.StatusBadRequest, response.NewResponse(
+				constants.InvalidRequestParams.Code,
+				constants.InvalidRequestParams.Message,
+				nil,
+			))
 			return
 		}
 
 		var req UpdateUserRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			response.HandleError(c, err)
+			c.JSON(http.StatusBadRequest, response.NewResponse(
+				constants.BindJSONFail.Code,
+				constants.BindJSONFail.Message,
+				nil,
+			))
 			return
 		}
 
 		if err := validator.Validate(req); err != nil {
-			response.HandleError(c, webErrValidationFailed)
+			c.JSON(http.StatusBadRequest, response.NewResponse(
+				constants.InvalidRequestParams.Code,
+				constants.InvalidRequestParams.Message,
+				nil,
+			))
 			return
 		}
 
@@ -55,10 +68,18 @@ func (h Handler) UpdateUser() gin.HandlerFunc {
 		}
 
 		if err := h.userCtrl.UpdateUser(c.Request.Context(), id, input); err != nil {
-			response.HandleError(c, convertError(err))
+			c.JSON(http.StatusInternalServerError, response.NewResponse(
+				constants.InternalServerError.Code,
+				err.Error(),
+				nil,
+			))
 			return
 		}
 
-		c.Status(http.StatusNoContent)
+		c.JSON(http.StatusOK, response.NewResponse(
+			constants.UpdateProfileSuccess.Code,
+			constants.UpdateProfileSuccess.Message,
+			nil,
+		))
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/namf2001/beta-workplace/internal/repository/db/pg"
 	"github.com/namf2001/beta-workplace/internal/repository/sessions"
 	"github.com/namf2001/beta-workplace/internal/repository/users"
+	"github.com/namf2001/beta-workplace/internal/repository/verification_tokens"
 	pkgerrors "github.com/pkg/errors"
 )
 
@@ -20,6 +21,8 @@ type Registry interface {
 	Account() accounts.Repository
 	// Session return session repository
 	Session() sessions.Repository
+	// VerificationToken return verification token repository
+	VerificationToken() verification_tokens.Repository
 	// DoInTx wraps operations within a db tx
 	DoInTx(ctx context.Context, txFunc func(ctx context.Context, txRepo Registry) error, overrideBackoffPolicy backoff.BackOff) error
 }
@@ -27,19 +30,21 @@ type Registry interface {
 // New returns a new instance of Registry
 func New(db pg.BeginnerExecutor) Registry {
 	return &impl{
-		pgConn:   db,
-		users:    users.New(db),
-		accounts: accounts.New(db),
-		sessions: sessions.New(db),
+		pgConn:            db,
+		users:             users.New(db),
+		accounts:          accounts.New(db),
+		sessions:          sessions.New(db),
+		verificationToken: verification_tokens.New(db),
 	}
 }
 
 type impl struct {
-	pgConn   pg.BeginnerExecutor // Only used to start DB txns
-	tx       pg.ContextExecutor  // Only used to keep track if txn has already been started to prevent nested txns
-	users    users.Repository
-	accounts accounts.Repository
-	sessions sessions.Repository
+	pgConn            pg.BeginnerExecutor // Only used to start DB txns
+	tx                pg.ContextExecutor  // Only used to keep track if txn has already been started to prevent nested txns
+	users             users.Repository
+	accounts          accounts.Repository
+	sessions          sessions.Repository
+	verificationToken verification_tokens.Repository
 }
 
 func (i *impl) User() users.Repository {
@@ -52,6 +57,10 @@ func (i *impl) Account() accounts.Repository {
 
 func (i *impl) Session() sessions.Repository {
 	return i.sessions
+}
+
+func (i *impl) VerificationToken() verification_tokens.Repository {
+	return i.verificationToken
 }
 
 // DoInTx wraps operations within a db tx.
@@ -68,10 +77,11 @@ func (i *impl) DoInTx(ctx context.Context, txFunc func(ctx context.Context, txRe
 
 	return pg.TxWithBackOff(ctx, overrideBackoffPolicy, i.pgConn, func(tx pg.ContextExecutor) error {
 		newI := &impl{
-			tx:       tx,
-			users:    users.New(tx),
-			accounts: accounts.New(tx),
-			sessions: sessions.New(tx),
+			tx:                tx,
+			users:             users.New(tx),
+			accounts:          accounts.New(tx),
+			sessions:          sessions.New(tx),
+			verificationToken: verification_tokens.New(tx),
 		}
 		return txFunc(ctx, newI)
 	})

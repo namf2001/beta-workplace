@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/namf2001/beta-workplace/constants"
 	ctrlAuth "github.com/namf2001/beta-workplace/internal/controller/auth"
 	"github.com/namf2001/beta-workplace/internal/handler/response"
 	"github.com/namf2001/beta-workplace/internal/pkg/validator"
@@ -25,21 +26,29 @@ type LoginResponse struct {
 // @Accept       json
 // @Produce      json
 // @Param        input body auth.LoginRequest true "Login credentials"
-// @Success      200  {object} auth.LoginResponse
-// @Failure      400  {object} response.Error
-// @Failure      401  {object} response.Error
-// @Failure      500  {object} response.Error
+// @Success      200  {object} response.Response
+// @Failure      400  {object} response.Response
+// @Failure      401  {object} response.Response
+// @Failure      500  {object} response.Response
 // @Router       /auth/login [post]
 func (h *Handler) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req LoginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			response.HandleError(c, err)
+			c.JSON(http.StatusBadRequest, response.NewResponse(
+				constants.BindJSONFail.Code,
+				constants.BindJSONFail.Message,
+				nil,
+			))
 			return
 		}
 
 		if err := validator.Validate(req); err != nil {
-			response.HandleError(c, webErrValidationFailed)
+			c.JSON(http.StatusBadRequest, response.NewResponse(
+				constants.InvalidRequestParams.Code,
+				constants.InvalidRequestParams.Message,
+				nil,
+			))
 			return
 		}
 
@@ -50,10 +59,18 @@ func (h *Handler) Login() gin.HandlerFunc {
 
 		token, err := h.ctrl.Login(c.Request.Context(), input)
 		if err != nil {
-			response.HandleError(c, webErrInvalidCredentials)
+			c.JSON(http.StatusInternalServerError, response.NewResponse(
+				constants.LoginFail.Code,
+				err.Error(),
+				nil,
+			))
 			return
 		}
 
-		c.JSON(http.StatusOK, LoginResponse{Token: token})
+		c.JSON(http.StatusOK, response.NewResponse(
+			constants.LoginSuccess.Code,
+			constants.LoginSuccess.Message,
+			LoginResponse{Token: token},
+		))
 	}
 }

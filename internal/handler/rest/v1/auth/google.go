@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/namf2001/beta-workplace/constants"
 	ctrlAuth "github.com/namf2001/beta-workplace/internal/controller/auth"
 	"github.com/namf2001/beta-workplace/internal/handler/response"
 	"github.com/namf2001/beta-workplace/internal/model"
@@ -56,40 +57,60 @@ func (h *Handler) GoogleLogin() gin.HandlerFunc {
 // @Param        state query string true "OAuth state"
 // @Param        code  query string true "OAuth code"
 // @Success      200  {object} auth.GoogleCallbackResponse
-// @Failure      400  {object} response.Error
-// @Failure      500  {object} response.Error
+// @Failure      400  {object} response.Response
+// @Failure      500  {object} response.Response
 // @Router       /auth/google/callback [get]
 func (h *Handler) GoogleCallback() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		state := c.Query("state")
 		if state != oauth.StateString {
-			response.HandleError(c, webErrInvalidOAuthState)
+			c.JSON(http.StatusBadRequest, response.NewResponse(
+				constants.InvalidOAuthState.Code,
+				constants.InvalidOAuthState.Message,
+				nil,
+			))
 			return
 		}
 
 		code := c.Query("code")
 		token, err := oauth.GoogleOauthConfig.Exchange(c.Request.Context(), code)
 		if err != nil {
-			response.HandleError(c, webErrCodeExchangeFailed)
+			c.JSON(http.StatusInternalServerError, response.NewResponse(
+				constants.CodeExchangeFailed.Code,
+				err.Error(),
+				nil,
+			))
 			return
 		}
 
 		resp, err := http.Get(GoogleUserInfoURL + "?access_token=" + token.AccessToken)
 		if err != nil {
-			response.HandleError(c, webErrGetUserInfoFailed)
+			c.JSON(http.StatusInternalServerError, response.NewResponse(
+				constants.GetUserInfoFail.Code,
+				err.Error(),
+				nil,
+			))
 			return
 		}
 		defer resp.Body.Close()
 
 		content, err := io.ReadAll(resp.Body)
 		if err != nil {
-			response.HandleError(c, webErrGetUserInfoFailed)
+			c.JSON(http.StatusInternalServerError, response.NewResponse(
+				constants.GetUserInfoFail.Code,
+				err.Error(),
+				nil,
+			))
 			return
 		}
 
 		var userInfo GoogleUserInfo
 		if err := json.Unmarshal(content, &userInfo); err != nil {
-			response.HandleError(c, webErrGetUserInfoFailed)
+			c.JSON(http.StatusInternalServerError, response.NewResponse(
+				constants.GetUserInfoFail.Code,
+				err.Error(),
+				nil,
+			))
 			return
 		}
 
@@ -101,19 +122,26 @@ func (h *Handler) GoogleCallback() gin.HandlerFunc {
 			RefreshToken:      token.RefreshToken,
 			ExpiresAt:         token.Expiry.Unix(),
 			TokenType:         token.TokenType,
-
-			Name:          userInfo.Name,
-			Email:         userInfo.Email,
-			Image:         userInfo.Picture,
-			EmailVerified: userInfo.VerifiedEmail,
+			Name:              userInfo.Name,
+			Email:             userInfo.Email,
+			Image:             userInfo.Picture,
+			EmailVerified:     userInfo.VerifiedEmail,
 		}
 
 		authToken, err := h.ctrl.OAuthLogin(c.Request.Context(), input)
 		if err != nil {
-			response.HandleError(c, err)
+			c.JSON(http.StatusInternalServerError, response.NewResponse(
+				constants.InternalServerError.Code,
+				err.Error(),
+				nil,
+			))
 			return
 		}
 
-		c.JSON(http.StatusOK, GoogleCallbackResponse{Token: authToken})
+		c.JSON(http.StatusOK, response.NewResponse(
+			constants.LoginSuccess.Code,
+			constants.LoginSuccess.Message,
+			GoogleCallbackResponse{Token: authToken},
+		))
 	}
 }

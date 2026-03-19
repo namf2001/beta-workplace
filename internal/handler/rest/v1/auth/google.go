@@ -92,7 +92,7 @@ func (h *Handler) GoogleCallback() gin.HandlerFunc {
 			))
 			return
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		content, err := io.ReadAll(resp.Body)
 		if err != nil {

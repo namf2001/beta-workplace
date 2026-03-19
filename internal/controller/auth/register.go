@@ -73,11 +73,12 @@ func (i impl) RegisterStep3Complete(ctx context.Context, input RegisterInput) (s
 	}
 
 	// 3. Create user + account
+	now := time.Now()
 	user := model.User{
 		Name:          input.Name,
 		Email:         input.Email,
 		Password:      hashedPassword,
-		EmailVerified: time.Now(),
+		EmailVerified: &now,
 	}
 
 	var createdUser model.User

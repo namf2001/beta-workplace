@@ -17,7 +17,7 @@ var (
 func (i impl) Update(ctx context.Context, user model.User) error {
 	query := `
 		UPDATE users
-		SET email = $1, name = $2, password = $3, image = $4, "emailVerified" = $5
+		SET email = $1, name = $2, password = $3, image = $4, email_verified = $5
 		WHERE id = $6
 	`
 

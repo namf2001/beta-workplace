@@ -44,8 +44,8 @@ func (h Handler) DeleteUser() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, response.NewResponse(
-			constants.DeleteAccountSuccess.Code,
-			constants.DeleteAccountSuccess.Message,
+			constants.DeleteUserSuccess.Code,
+			constants.DeleteUserSuccess.Message,
 			nil,
 		))
 	}

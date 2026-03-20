@@ -30,6 +30,18 @@ type Controller interface {
 
 	// OAuthLogin handles oauth login/registration
 	OAuthLogin(ctx context.Context, input OAuthInput) (string, error)
+
+	// GetUserProfile retrieves user profile by user ID
+	GetUserProfile(ctx context.Context, userID int64) (interface{}, error)
+
+	// UpdateUserProfile updates user profile
+	UpdateUserProfile(ctx context.Context, userID int64, input interface{}) (interface{}, error)
+
+	// ChangePassword changes user password
+	ChangePassword(ctx context.Context, userID int64, oldPassword, newPassword string) error
+
+	// DeleteAccount deletes user account and all related data
+	DeleteAccount(ctx context.Context, userID int64) error
 }
 
 type impl struct {

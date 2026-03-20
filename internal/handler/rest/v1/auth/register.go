@@ -34,7 +34,7 @@ type RegisterResponse struct {
 // @Failure      400  {object} response.Response
 // @Failure      500  {object} response.Response
 // @Router       /auth/register [post]
-func (h *Handler) Register() gin.HandlerFunc {
+func (h Handler) Register() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req RegisterRequest
 		if err := c.ShouldBindJSON(&req); err != nil {

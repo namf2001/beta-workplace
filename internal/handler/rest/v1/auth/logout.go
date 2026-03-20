@@ -20,7 +20,7 @@ import (
 // @Failure      500  {object} response.Response
 // @Security     BearerAuth
 // @Router       /auth/logout [post]
-func (h *Handler) Logout() gin.HandlerFunc {
+func (h Handler) Logout() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claimsVal, exists := c.Get("user_claims")
 		if !exists {

@@ -82,6 +82,15 @@ func (rtr router) apiV1(r *gin.Engine) {
 		authProtected := protected.Group("/auth")
 		{
 			authProtected.POST("/logout", rtr.authHandler.Logout())
+
+			// User Management APIs
+			userManagement := authProtected.Group("/user")
+			{
+				userManagement.GET("/profile", rtr.authHandler.GetProfile())
+				userManagement.PUT("/profile", rtr.authHandler.UpdateProfile())
+				userManagement.PATCH("/password", rtr.authHandler.ChangePassword())
+				userManagement.DELETE("/account", rtr.authHandler.DeleteAccount())
+			}
 		}
 
 		users := protected.Group("/users")

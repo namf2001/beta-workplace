@@ -164,7 +164,7 @@ var (
 	GetUserInfoSuccess            = ResponseCode{"INF008", "Get user info success"}
 	SendEmailRegisterSuccess      = ResponseCode{"INF009", "Send email register success"}
 	UpdateProfileSuccess          = ResponseCode{"INF010", "Update profile success"}
-	DeleteAccountSuccess          = ResponseCode{"INF055", "Delete user success"}
+	DeleteUserSuccess             = ResponseCode{"INF055", "Delete user success"}
 	ValidEmail                    = ResponseCode{"INF049", "Valid email"}
 	UpdateKeySuccess              = ResponseCode{"INF060", "update key success"}
 	EmailVerifiedSuccess          = ResponseCode{"INF061", "Email verified successfully"}

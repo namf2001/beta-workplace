@@ -29,7 +29,7 @@ type ForgotPasswordRequest struct {
 // @Failure      400  {object} response.Response
 // @Failure      500  {object} response.Response
 // @Router       /auth/forgot-password [post]
-func (h *Handler) ForgotPassword() gin.HandlerFunc {
+func (h Handler) ForgotPassword() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req ForgotPasswordRequest
 		if err := c.ShouldBindJSON(&req); err != nil {

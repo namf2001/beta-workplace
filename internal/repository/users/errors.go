@@ -1,8 +1,11 @@
 package users
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
-	ErrNotFound      = errors.New("user not found")
-	ErrAlreadyExists = errors.New("user already exists")
+	ErrNotFound       = errors.New("user not found")
+	ErrAlreadyExists  = errors.New("user already exists")
+	ErrDuplicateEmail = errors.New("user with this email already exists")
 )

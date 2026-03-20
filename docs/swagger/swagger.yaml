@@ -1,5 +1,17 @@
 basePath: /api/v1
 definitions:
+  auth.ChangePasswordRequest:
+    properties:
+      new_password:
+        minLength: 6
+        type: string
+      old_password:
+        minLength: 6
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
   auth.ForgotPasswordRequest:
     properties:
       email:
@@ -61,6 +73,29 @@ definitions:
     required:
     - email
     - step
+    type: object
+  auth.UpdateProfileRequest:
+    properties:
+      address:
+        type: string
+      colour:
+        type: string
+      date_of_birth:
+        type: string
+      email:
+        type: string
+      full_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      gender:
+        maximum: 2
+        minimum: 0
+        type: integer
+      phone_number:
+        type: string
+      profile_image:
+        type: string
     type: object
   model.User:
     properties:
@@ -307,6 +342,128 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: Register user
+      tags:
+      - auth
+  /auth/user/account:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the account of the currently authenticated user and all
+        related data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete account
+      tags:
+      - auth
+  /auth/user/password:
+    patch:
+      consumes:
+      - application/json
+      description: Change the password of the currently authenticated user
+      parameters:
+      - description: Password info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Change password
+      tags:
+      - auth
+  /auth/user/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get the profile of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - auth
+    put:
+      consumes:
+      - application/json
+      description: Update the profile of the currently authenticated user
+      parameters:
+      - description: Update info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/auth.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update user profile
       tags:
       - auth
   /users:

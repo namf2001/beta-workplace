@@ -23,6 +23,9 @@ type Repository interface {
 	// Update updates an existing user
 	Update(ctx context.Context, user model.User) error
 
+	// UpdatePassword updates user password
+	UpdatePassword(ctx context.Context, id int64, hashedPassword string) error
+
 	// Delete deletes a user by ID
 	Delete(ctx context.Context, id int64) error
 

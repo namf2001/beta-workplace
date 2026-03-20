@@ -107,7 +107,7 @@ migrate-up: ## Run database migrations
 
 migrate-down: ## Rollback database migrations
 	@echo "Rolling back migrations..."
-	@for file in migrations/*.down.sql; do \
+	@for file in $$(ls -r migrations/*.down.sql); do \
 		echo "Rolling back $$file..."; \
 		PGPASSWORD=$(DB_PASSWORD) psql -h $(DB_HOST) -U $(DB_USER) -d $(DB_NAME) -f $$file; \
 	done

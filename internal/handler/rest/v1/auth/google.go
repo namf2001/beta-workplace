@@ -42,10 +42,14 @@ type GoogleUserInfo struct {
 // @Produce      json
 // @Success      200  {object} auth.GoogleLoginResponse
 // @Router       /auth/google/login [get]
-func (h *Handler) GoogleLogin() gin.HandlerFunc {
+func (h Handler) GoogleLogin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		url := oauth.GoogleOauthConfig.AuthCodeURL(oauth.StateString)
-		c.JSON(http.StatusOK, GoogleLoginResponse{URL: url})
+		c.JSON(http.StatusOK, response.NewResponse(
+			constants.LoginSuccess.Code,
+			constants.LoginSuccess.Message,
+			GoogleLoginResponse{URL: url},
+		))
 	}
 }
 
@@ -60,7 +64,7 @@ func (h *Handler) GoogleLogin() gin.HandlerFunc {
 // @Failure      400  {object} response.Response
 // @Failure      500  {object} response.Response
 // @Router       /auth/google/callback [get]
-func (h *Handler) GoogleCallback() gin.HandlerFunc {
+func (h Handler) GoogleCallback() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		state := c.Query("state")
 		if state != oauth.StateString {

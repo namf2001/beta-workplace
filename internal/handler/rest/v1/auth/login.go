@@ -31,7 +31,7 @@ type LoginResponse struct {
 // @Failure      401  {object} response.Response
 // @Failure      500  {object} response.Response
 // @Router       /auth/login [post]
-func (h *Handler) Login() gin.HandlerFunc {
+func (h Handler) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req LoginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {

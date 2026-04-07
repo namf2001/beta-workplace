@@ -13,8 +13,10 @@ import (
 
 	"github.com/namf2001/beta-workplace/config"
 	authcontroller "github.com/namf2001/beta-workplace/internal/controller/auth"
+	orgscontroller "github.com/namf2001/beta-workplace/internal/controller/organizations"
 	userscontroller "github.com/namf2001/beta-workplace/internal/controller/users"
 	authhandler "github.com/namf2001/beta-workplace/internal/handler/rest/v1/auth"
+	orgshandler "github.com/namf2001/beta-workplace/internal/handler/rest/v1/organizations"
 	usershandler "github.com/namf2001/beta-workplace/internal/handler/rest/v1/users"
 	"github.com/namf2001/beta-workplace/internal/pkg/database"
 	"github.com/namf2001/beta-workplace/internal/pkg/oauth"
@@ -79,14 +81,17 @@ func run(ctx context.Context) error {
 	// Initialize controllers
 	usersController := userscontroller.New(repo)
 	authController := authcontroller.New(repo)
+	orgsController := orgscontroller.New(repo)
 	// Initialize handlers
 	usersHandler := usershandler.New(usersController)
 	authHandler := authhandler.New(authController)
+	orgHandler := orgshandler.New(orgsController)
 	// Setup router
 	rtr := router{
 		ctx:          ctx,
 		usersHandler: usersHandler,
 		authHandler:  authHandler,
+		orgHandler:   orgHandler,
 	}
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.AppPort)

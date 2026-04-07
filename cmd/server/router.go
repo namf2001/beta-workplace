@@ -10,6 +10,7 @@ import (
 	_ "github.com/namf2001/beta-workplace/docs/swagger"
 	appMiddleware "github.com/namf2001/beta-workplace/internal/handler/middleware"
 	authhandler "github.com/namf2001/beta-workplace/internal/handler/rest/v1/auth"
+	orgshandler "github.com/namf2001/beta-workplace/internal/handler/rest/v1/organizations"
 	usershandler "github.com/namf2001/beta-workplace/internal/handler/rest/v1/users"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
@@ -21,6 +22,7 @@ type router struct {
 	ctx          context.Context
 	usersHandler *usershandler.Handler
 	authHandler  *authhandler.Handler
+	orgHandler   *orgshandler.Handler
 }
 
 // handler returns the handler for use by the server
@@ -90,6 +92,20 @@ func (rtr router) apiV1(r *gin.Engine) {
 				userManagement.PUT("/profile", rtr.authHandler.UpdateProfile())
 				userManagement.PATCH("/password", rtr.authHandler.ChangePassword())
 				userManagement.DELETE("/account", rtr.authHandler.DeleteAccount())
+			}
+
+			// Organization APIs
+			orgs := authProtected.Group("/organizations")
+			{
+				orgs.POST("", rtr.orgHandler.CreateOrganization())
+				orgs.GET("", rtr.orgHandler.GetUserOrganizations())
+				orgs.POST("/join", rtr.orgHandler.JoinOrganization())
+				orgs.GET("/:id", rtr.orgHandler.GetOrganization())
+				orgs.PUT("/:id", rtr.orgHandler.UpdateOrganization())
+				orgs.POST("/:id/invite", rtr.orgHandler.InviteMember())
+				orgs.GET("/:id/members", rtr.orgHandler.GetMembers())
+				orgs.PUT("/:id/members/role", rtr.orgHandler.UpdateMemberRole())
+				orgs.DELETE("/:id/members/:memberId", rtr.orgHandler.RemoveMember())
 			}
 		}
 

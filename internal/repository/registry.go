@@ -7,6 +7,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/namf2001/beta-workplace/internal/repository/accounts"
 	"github.com/namf2001/beta-workplace/internal/repository/db/pg"
+	"github.com/namf2001/beta-workplace/internal/repository/organizations"
 	"github.com/namf2001/beta-workplace/internal/repository/sessions"
 	"github.com/namf2001/beta-workplace/internal/repository/users"
 	"github.com/namf2001/beta-workplace/internal/repository/verification_tokens"
@@ -23,6 +24,8 @@ type Registry interface {
 	Session() sessions.Repository
 	// VerificationToken return verification token repository
 	VerificationToken() verification_tokens.Repository
+	// Organization return organization repository
+	Organization() organizations.Repository
 	// DoInTx wraps operations within a db tx
 	DoInTx(ctx context.Context, txFunc func(ctx context.Context, txRepo Registry) error, overrideBackoffPolicy backoff.BackOff) error
 }
@@ -35,6 +38,7 @@ func New(db pg.BeginnerExecutor) Registry {
 		accounts:          accounts.New(db),
 		sessions:          sessions.New(db),
 		verificationToken: verification_tokens.New(db),
+		organizations:     organizations.New(db),
 	}
 }
 
@@ -45,6 +49,7 @@ type impl struct {
 	accounts          accounts.Repository
 	sessions          sessions.Repository
 	verificationToken verification_tokens.Repository
+	organizations     organizations.Repository
 }
 
 func (i *impl) User() users.Repository {
@@ -63,10 +68,16 @@ func (i *impl) VerificationToken() verification_tokens.Repository {
 	return i.verificationToken
 }
 
+func (i *impl) Organization() organizations.Repository {
+	return i.organizations
+}
+
 // DoInTx wraps operations within a db tx.
 // It creates a new Registry where all repositories share the same transaction.
 // Nested transactions are not allowed.
-func (i *impl) DoInTx(ctx context.Context, txFunc func(ctx context.Context, txRepo Registry) error, overrideBackoffPolicy backoff.BackOff) error {
+func (i *impl) DoInTx(ctx context.Context,
+	txFunc func(ctx context.Context, txRepo Registry) error,
+	overrideBackoffPolicy backoff.BackOff) error {
 	if i.tx != nil {
 		return pkgerrors.WithStack(errNestedTx)
 	}
@@ -82,6 +93,7 @@ func (i *impl) DoInTx(ctx context.Context, txFunc func(ctx context.Context, txRe
 			accounts:          accounts.New(tx),
 			sessions:          sessions.New(tx),
 			verificationToken: verification_tokens.New(tx),
+			organizations:     organizations.New(tx),
 		}
 		return txFunc(ctx, newI)
 	})
